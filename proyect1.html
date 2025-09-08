@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Historia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fff;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Calendario */
+        .calendar-container {
+            width: 400px;
+            height: 450px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+        }
+
+        .calendar {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.2);
+            border: 1px solid #f0e6ff;
+        }
+
+        .calendar-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+            color: white;
+            text-align: center;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .calendar-header h2 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .calendar-header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .calendar-body {
+            padding: 25px;
+        }
+
+        .calendar-weekdays {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #EEE;
+            padding-bottom: 10px;
+        }
+
+        .calendar-weekdays div {
+            width: calc(100% / 7);
+            text-align: center;
+            font-weight: 600;
+            color: #8A2BE2;
+            font-size: 0.9rem;
+        }
+
+        .calendar-days {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .calendar-days div {
+            width: calc((100% - 30px) / 7);
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 50%;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .calendar-days .today {
+            background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+
+        /* Área de texto */
+        .text-container {
+            width: 90%;
+            max-width: 600px;
+            max-height: 60vh;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            padding: 30px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.15);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f0e6ff;
+            overflow-y: auto;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .text-container.visible {
+            opacity: 1;
+            display: flex;
+        }
+
+        .message {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            text-align: left;
+            color: #4B0082;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .time-counter {
+            color: #8A2BE2;
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: inline;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.5rem;
+            background-color: #8A2BE2;
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Botón Siguiente */
+        .next-button-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .next-button-container.visible {
+            opacity: 1;
+        }
+
+        .next-button {
+            background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.3);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .next-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 15px rgba(138, 43, 226, 0.3);
+        }
+
+        /* Overlay para efecto de oscurecimiento */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            z-index: 30;
+            pointer-events: none;
+            transition: background-color 1s ease;
+        }
+
+        .overlay.active {
+            background-color: rgba(0, 0, 0, 0.9);
+            pointer-events: all;
+        }
+
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            color: #FF4D7C;
+            opacity: 0;
+            animation: float 8s ease-in infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Media Queries para Responsive */
+        @media (min-width: 901px) {
+            .scene {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                align-items: center;
+                justify-content: center;
+                gap: 40px;
+            }
+            
+            .calendar-container {
+                position: absolute;
+                transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            
+            .text-container {
+                width: 55%;
+                transform: translateX(50px);
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-left: auto;
+                margin-bottom: 80px;
+            }
+            
+            .text-container.visible {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .calendar-container {
+                width: 100%;
+                max-width: 380px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            
+            .text-container {
+                width: 90%;
+                max-width: 600px;
+                max-height: 55vh;
+                margin-bottom: 70px;
+            }
+            
+            .message {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+            
+            .time-counter {
+                font-size: 1.2rem;
+            }
+            
+            .next-button {
+                padding: 12px 30px;
+                font-size: 1.1rem;
+            }
+            
+            .next-button-container {
+                bottom: 30px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .calendar-container {
+                height: 350px;
+                max-width: 320px;
+            }
+            
+            .calendar-header {
+                padding: 15px;
+            }
+            
+            .calendar-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .calendar-header p {
+                font-size: 1.1rem;
+            }
+            
+            .calendar-body {
+                padding: 15px;
+            }
+            
+            .calendar-days div {
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .text-container {
+                padding: 20px;
+                max-height: 50vh;
+                margin-bottom: 60px;
+            }
+            
+            .message {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            .time-counter {
+                font-size: 1.1rem;
+            }
+            
+            .next-button {
+                padding: 10px 25px;
+                font-size: 1rem;
+            }
+            
+            .next-button-container {
+                bottom: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .calendar-container {
+                height: 320px;
+                max-width: 300px;
+            }
+            
+            .calendar-header {
+                padding: 12px;
+            }
+            
+            .calendar-header h2 {
+                font-size: 1.6rem;
+            }
+            
+            .calendar-header p {
+                font-size: 1rem;
+            }
+            
+            .calendar-weekdays div {
+                font-size: 0.8rem;
+            }
+            
+            .calendar-days div {
+                height: 32px;
+                font-size: 0.8rem;
+            }
+            
+            .text-container {
+                padding: 15px;
+                max-height: 45vh;
+                margin-bottom: 50px;
+            }
+            
+            .message {
+                font-size: 0.95rem;
+            }
+            
+            .time-counter {
+                font-size: 1rem;
+            }
+            
+            .next-button {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-container" id="calendarContainer">
+            <div class="calendar">
+                <div class="calendar-header">
+                    <h2>Mayo</h2>
+                    <p>2023</p>
+                </div>
+                <div class="calendar-body">
+                    <div class="calendar-weekdays">
+                        <div>L</div>
+                        <div>M</div>
+                        <div>X</div>
+                        <div>J</div>
+                        <div>V</div>
+                        <div>S</div>
+                        <div>D</div>
+                    </div>
+                    <div class="calendar-days" id="days">
+                        <!-- Días generados por JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-container" id="textContainer">
+            <div class="message" id="message"></div>
+        </div>
+        
+        <div class="next-button-container" id="nextButtonContainer">
+            <button class="next-button" id="nextButton">Siguiente</button>
+        </div>
+        
+        <div class="hearts" id="hearts"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarContainer = document.getElementById('calendarContainer');
+            const textContainer = document.getElementById('textContainer');
+            const daysContainer = document.getElementById('days');
+            const messageElement = document.getElementById('message');
+            const heartsContainer = document.getElementById('hearts');
+            const nextButtonContainer = document.getElementById('nextButtonContainer');
+            const nextButton = document.getElementById('nextButton');
+            const overlay = document.getElementById('overlay');
+            
+            // Fecha del primer contacto: 10 de mayo de 2023 a las 2:12 am
+            const firstContactDate = new Date(2023, 4, 10, 2, 12, 0);
+            
+            // Generar calendario para mayo 2023
+            generateCalendar(daysContainer, 5, 2023, 10);
+            
+            // Crear corazones flotantes
+            createHearts();
+            
+            // Detectar si es dispositivo móvil
+            const isMobile = window.innerWidth <= 900;
+            
+            // Iniciar transición después de 10 segundos
+            setTimeout(() => {
+                startTransition();
+            }, 10000);
+            
+            function startTransition() {
+                if (isMobile) {
+                    // Para móviles: el calendario desaparece y aparece el texto
+                    calendarContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        calendarContainer.style.display = 'none';
+                        textContainer.classList.add('visible');
+                        typewriter();
+                    }, 1000);
+                } else {
+                    // Para escritorio: el calendario se mueve a la izquierda y aparece el texto
+                    calendarContainer.style.transform = 'translateX(-300px) scale(0.85)';
+                    setTimeout(() => {
+                        textContainer.classList.add('visible');
+                        typewriter();
+                    }, 800);
+                }
+            }
+            
+            function generateCalendar(container, month, year, specialDay) {
+                // Limpiar el contenedor
+                container.innerHTML = '';
+                
+                // Obtener el primer día del mes
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                // Ajustar para que la semana comience en lunes
+                const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+                
+                // Obtener el número de días en el mes
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                // Añadir días vacíos para alinear el primer día
+                for (let i = 0; i < adjustedFirstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('empty');
+                    container.appendChild(emptyDay);
+                }
+                
+                // Añadir los días del mes
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const day = document.createElement('div');
+                    day.textContent = i;
+                    
+                    if (i === specialDay) {
+                        day.classList.add('today');
+                    }
+                    
+                    container.appendChild(day);
+                }
+            }
+            
+            function createHearts() {
+                const heartSymbols = ['💜', '💜', '💜', '💜', '💜', '💜', '💜'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+                    
+                    // Posición aleatoria
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.top = (Math.random() * 100 + 100) + 'vh';
+                    
+                    // Tamaño aleatorio
+                    const size = Math.random() * 20 + 20;
+                    heart.style.fontSize = size + 'px';
+                    
+                    // Retraso aleatorio en la animación
+                    heart.style.animationDelay = Math.random() * 8 + 's';
+                    
+                    // Duración aleatoria
+                    heart.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                    
+                    heartsContainer.appendChild(heart);
+                }
+            }
+            
+            function calculateTimeDifference() {
+                const now = new Date();
+                const diff = now - firstContactDate;
+                
+                // Calcular años, meses, días, horas, minutos y segundos
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                
+                // Aproximación para meses y años
+                const months = Math.floor(days / 30.44); // Promedio de días por mes
+                const years = Math.floor(months / 12);
+                
+                // Calcular el resto
+                const remainingMonths = months % 12;
+                const remainingDays = Math.floor(days % 30.44);
+                const remainingHours = hours % 24;
+                const remainingMinutes = minutes % 60;
+                const remainingSeconds = seconds % 60;
+                
+                return `${years} años, ${remainingMonths} meses, ${remainingDays} días, ${remainingHours} horas, ${remainingMinutes} minutos y ${remainingSeconds} segundos`;
+            }
+            
+            function typewriter() {
+                const baseText = "Hace XXX le mande el primer mensaje después de años sin una sola palabra, sin pensarlo ese fue en principio de una nueva etapa en mi vida, la etapa donde conocí el verdadero amor, la etapa donde me pude entregar completamente una persona, amarla desde lo mas hondo de mi corazón, un amor genuino que quizá nunca lo busque, pero lo encontré con la persona que de verdad menos esperaba, y fue la mejor decisión de mi vida por que se lo entregue a la persona correcta, a una persona increíble, inteligente, amable, hermosa, muy hermosa, demasiado hermosa, talentosa, perspicaz, graciosa, y que se merece todas las palabras bonitas del diccionario, esa persona la considero el amor de mi vida, no se que me deparara el destino, pero le ruego a la vida que sea con esa persona, estar para ella en sus buenos y malos momentos y que ella también este para mí, quiero vivir una vida entera con ella, con ella me di cuenta que no necesito a nadie más, con ella es más que suficiente, nunca voy a encontrar una persona como ella tan especial.";
+                
+                let i = 0;
+                let speed = 30; // Velocidad de escritura (ms por caracter)
+                
+                // Iniciar la actualización del contador inmediatamente
+                startCounter();
+                
+                function type() {
+                    if (i < baseText.length) {
+                        // Reemplazar XXX con el contador en tiempo real
+                        if (baseText.substr(i, 3) === 'XXX') {
+                            messageElement.innerHTML += `<span class="time-counter">${calculateTimeDifference()}</span>`;
+                            i += 3;
+                        } else {
+                            messageElement.innerHTML += baseText.charAt(i);
+                            i++;
+                        }
+                        setTimeout(type, speed);
+                    } else {
+                        // Añadir cursor parpadeante al final
+                        messageElement.innerHTML += '<span class="cursor"></span>';
+                        // Mostrar el botón "Siguiente"
+                        setTimeout(() => {
+                            nextButtonContainer.classList.add('visible');
+                        }, 500);
+                    }
+                }
+                
+                type();
+            }
+            
+            function startCounter() {
+                // Actualizar contador cada segundo
+                setInterval(() => {
+                    const timeCounter = document.querySelector('.time-counter');
+                    if (timeCounter) {
+                        timeCounter.textContent = calculateTimeDifference();
+                    }
+                }, 1000);
+            }
+            
+            // Evento para el botón "Siguiente"
+            nextButton.addEventListener('click', function() {
+                // Oscurecer la pantalla
+                overlay.classList.add('active');
+                
+                // Redirigir después de que termine la animación de oscurecimiento
+                setTimeout(() => {
+                    window.location.href = 'proyect3.html';
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
