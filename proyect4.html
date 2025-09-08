@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestro Futuro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fff;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Calendario */
+        .calendar-container {
+            width: 400px;
+            height: 450px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+        }
+
+        .calendar {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.2);
+            border: 1px solid #f0e6ff;
+        }
+
+        .calendar-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+            color: white;
+            text-align: center;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .calendar-header h2 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .calendar-header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .calendar-body {
+            padding: 25px;
+        }
+
+        .calendar-weekdays {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #EEE;
+            padding-bottom: 10px;
+        }
+
+        .calendar-weekdays div {
+            width: calc(100% / 7);
+            text-align: center;
+            font-weight: 600;
+            color: #8A2BE2;
+            font-size: 0.9rem;
+        }
+
+        .calendar-days {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .calendar-days div {
+            width: calc((100% - 30px) / 7);
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 50%;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Área de texto */
+        .text-container {
+            width: 90%;
+            max-width: 600px;
+            max-height: 60vh;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            padding: 30px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.15);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f0e6ff;
+            overflow-y: auto;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .text-container.visible {
+            opacity: 1;
+            display: flex;
+        }
+
+        .message {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            text-align: left;
+            color: #4B0082;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.5rem;
+            background-color: #8A2BE2;
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Mensaje de cumpleaños */
+        .birthday-message {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8A2BE2;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            font-family: 'Nunito', sans-serif;
+            z-index: 20;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .birthday-message.visible {
+            opacity: 1;
+        }
+
+        /* Overlay para efecto de oscurecimiento */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            z-index: 30;
+            pointer-events: none;
+            transition: background-color 1s ease;
+        }
+
+        .overlay.active {
+            background-color: rgba(0, 0, 0, 0.9);
+            pointer-events: all;
+        }
+
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            color: #FF4D7C;
+            opacity: 0;
+            animation: float 8s ease-in infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Media Queries para Responsive */
+        @media (min-width: 901px) {
+            .scene {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                align-items: center;
+                justify-content: center;
+                gap: 40px;
+            }
+            
+            .calendar-container {
+                position: absolute;
+                transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            
+            .text-container {
+                width: 55%;
+                transform: translateX(50px);
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-left: auto;
+                margin-bottom: 80px;
+            }
+            
+            .text-container.visible {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .calendar-container {
+                width: 100%;
+                max-width: 380px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            
+            .text-container {
+                width: 90%;
+                max-width: 600px;
+                max-height: 55vh;
+                margin-bottom: 70px;
+            }
+            
+            .message {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+            
+            .birthday-message {
+                font-size: 1.2rem;
+                bottom: 30px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .calendar-container {
+                height: 350px;
+                max-width: 320px;
+            }
+            
+            .calendar-header {
+                padding: 15px;
+            }
+            
+            .calendar-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .calendar-header p {
+                font-size: 1.1rem;
+            }
+            
+            .calendar-body {
+                padding: 15px;
+            }
+            
+            .calendar-days div {
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .text-container {
+                padding: 20px;
+                max-height: 50vh;
+                margin-bottom: 60px;
+            }
+            
+            .message {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            .birthday-message {
+                font-size: 1.1rem;
+                bottom: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .calendar-container {
+                height: 320px;
+                max-width: 300px;
+            }
+            
+            .calendar-header {
+                padding: 12px;
+            }
+            
+            .calendar-header h2 {
+                font-size: 1.6rem;
+            }
+            
+            .calendar-header p {
+                font-size: 1rem;
+            }
+            
+            .calendar-weekdays div {
+                font-size: 0.8rem;
+            }
+            
+            .calendar-days div {
+                height: 32px;
+                font-size: 0.8rem;
+            }
+            
+            .text-container {
+                padding: 15px;
+                max-height: 45vh;
+                margin-bottom: 50px;
+            }
+            
+            .message {
+                font-size: 0.95rem;
+            }
+            
+            .birthday-message {
+                font-size: 1rem;
+                bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-container" id="calendarContainer">
+            <div class="calendar">
+                <div class="calendar-header">
+                    <h2>¿?</h2>
+                    <p>¿?</p>
+                </div>
+                <div class="calendar-body">
+                    <div class="calendar-weekdays">
+                        <div>¿?</div>
+                        <div>¿?</div>
+                        <div>¿?</div>
+                        <div>¿?</div>
+                        <div>¿?</div>
+                        <div>¿?</div>
+                        <div>¿?</div>
+                    </div>
+                    <div class="calendar-days" id="days">
+                        <!-- Días generados por JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-container" id="textContainer">
+            <div class="message" id="message"></div>
+        </div>
+        
+        <div class="birthday-message" id="birthdayMessage">
+            Feliz cumpleaños mi niña, que cumplas mucho más y siempre a mi lado.
+        </div>
+        
+        <div class="hearts" id="hearts"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarContainer = document.getElementById('calendarContainer');
+            const textContainer = document.getElementById('textContainer');
+            const daysContainer = document.getElementById('days');
+            const messageElement = document.getElementById('message');
+            const heartsContainer = document.getElementById('hearts');
+            const birthdayMessage = document.getElementById('birthdayMessage');
+            
+            // Generar calendario con signos de interrogación
+            generateCalendar(daysContainer);
+            
+            // Crear corazones flotantes
+            createHearts();
+            
+            // Detectar si es dispositivo móvil
+            const isMobile = window.innerWidth <= 900;
+            
+            // Iniciar transición después de 10 segundos
+            setTimeout(() => {
+                startTransition();
+            }, 10000);
+            
+            function startTransition() {
+                if (isMobile) {
+                    // Para móviles: el calendario desaparece y aparece el texto
+                    calendarContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        calendarContainer.style.display = 'none';
+                        textContainer.classList.add('visible');
+                        typewriter();
+                    }, 1000);
+                } else {
+                    // Para escritorio: el calendario se mueve a la izquierda y aparece el texto
+                    calendarContainer.style.transform = 'translateX(-300px) scale(0.85)';
+                    setTimeout(() => {
+                        textContainer.classList.add('visible');
+                        typewriter();
+                    }, 800);
+                }
+            }
+            
+            function generateCalendar(container) {
+                // Limpiar el contenedor
+                container.innerHTML = '';
+                
+                // Añadir días vacíos para alinear el primer día
+                for (let i = 0; i < 7; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('empty');
+                    container.appendChild(emptyDay);
+                }
+                
+                // Añadir los días del mes con signos de interrogación (sin resaltar)
+                for (let i = 1; i <= 28; i++) {
+                    const day = document.createElement('div');
+                    
+                    // Todos los días son signos de interrogación sin resaltar
+                    day.textContent = '¿?';
+                    
+                    container.appendChild(day);
+                }
+            }
+            
+            function createHearts() {
+                const heartSymbols = ['💜', '💜', '💜', '💜', '💜', '💜', '💜'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+                    
+                    // Posición aleatoria
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.top = (Math.random() * 100 + 100) + 'vh';
+                    
+                    // Tamaño aleatorio
+                    const size = Math.random() * 20 + 20;
+                    heart.style.fontSize = size + 'px';
+                    
+                    // Retraso aleatorio en la animación
+                    heart.style.animationDelay = Math.random() * 8 + 's';
+                    
+                    // Duración aleatoria
+                    heart.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                    
+                    heartsContainer.appendChild(heart);
+                }
+            }
+            
+            function typewriter() {
+                const baseText = "No sé si sea pronto o lleve su tiempo, pero sé que va a suceder: Yeraldin va a ser mi esposa, me voy a casar con esa mujer. Va a ser en el momento correcto para que podamos tener una vida totalmente estable donde ambos cumplamos nuestros sueños. Nos entreguemos mutuamente al otro por toda nuestra vida: nuestro hogar, nuestros animales. Anhelo que lo primero que vea al despertar sea su bello rostro, recibirnos con un abrazo cada día, cocinar juntos, cenar juntos, reír juntos, llorar juntos. Que su olor quede impregnado en la cama, que toda mi vida restante sea con Yeraldin, la persona que más amo y voy a amar en toda mi vida. Quizá formar una familia, envejecer juntos, recordar todos estos momentos alegremente y amarla con la misma e inclusive más intensidad. Conocer cada una de sus curvas al pasar el tiempo. En definitiva, estoy totalmente seguro de que quiero a esa mujer en mi vida: verla progresar, verla feliz y ser parte de eso. Te amo demasiado, Yeraldin; no se imagina cuánto.";
+                
+                let i = 0;
+                let speed = 30; // Velocidad de escritura (ms por caracter)
+                
+                function type() {
+                    if (i < baseText.length) {
+                        messageElement.innerHTML += baseText.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else {
+                        // Añadir cursor parpadeante al final
+                        messageElement.innerHTML += '<span class="cursor"></span>';
+                        // Mostrar el mensaje de cumpleaños
+                        setTimeout(() => {
+                            birthdayMessage.classList.add('visible');
+                        }, 500);
+                    }
+                }
+                
+                type();
+            }
+        });
+    </script>
+</body>
+</html>
