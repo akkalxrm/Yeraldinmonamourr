@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corazón 3D con Mensajes de Amor</title>
+    <style>
+        /* Estilos existentes */
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* CONTENEDOR PARA CENTRAR EL CORAZÓN */
+        .heart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* AJUSTA EL TAMAÑO DEL CORAZÓN AQUÍ */
+        model-viewer {
+            width: 70vw;   /* Cambia este valor para ajustar el ancho */
+            height: 70vh;  /* Cambia este valor para ajustar el alto */
+            max-width: 600px; /* Tamaño máximo opcional */
+            max-height: 600px; /* Tamaño máximo opcional */
+        }
+
+        /* Nuevos estilos para el fondo espacial */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle linear infinite alternate;
+            transform-origin: center;
+        }
+
+        /* Estrellas pequeñas */
+        .star.small {
+            width: 1px;
+            height: 1px;
+            opacity: 0.7;
+            animation-duration: 3s;
+        }
+
+        /* Estrellas medianas */
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            opacity: 0.9;
+            animation-duration: 5s;
+        }
+
+        /* Estrellas grandes */
+        .star.large {
+            width: 3px;
+            height: 3px;
+            opacity: 1;
+            animation-duration: 7s;
+        }
+
+        /* Efecto de centelleo */
+        @keyframes twinkle {
+            0% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Mensaje para dispositivos móviles */
+        .mobile-message {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 2s;
+        }
+
+        /* Controles de rotación (OCULTOS VISUALMENTE) */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            opacity: 0; /* Ocultos visualmente */
+            pointer-events: none; /* No interactuables */
+        }
+
+        .control-btn {
+            background: rgba(255, 0, 85, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 0, 85, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Contenedor de palabras flotantes */
+        .floating-words {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .word {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 24px;
+            font-weight: 300;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateZ(800px);
+            animation: floatWord 20s linear infinite;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Arial', sans-serif;
+            will-change: transform, opacity;
+        }
+
+        @keyframes floatWord {
+            0% {
+                opacity: 0;
+                transform: translateZ(800px) translateY(0) translateX(0) scale(0.8);
+            }
+            5% {
+                opacity: 0.6;
+            }
+            15% {
+                opacity: 0.6;
+            }
+            40% {
+                opacity: 0.4;
+            }
+            70% {
+                opacity: 0.2;
+            }
+            95% {
+                opacity: 0;
+                transform: translateZ(-1000px) translateY(calc(var(--y-end) * 1px)) translateX(calc(var(--x-end) * 1px)) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateZ(-1200px) translateY(calc(var(--y-end) * 1.2px)) translateX(calc(var(--x-end) * 1.2px)) scale(1.3);
+            }
+        }
+
+        /* Botón "Play" minimalista */
+        .next-page-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 1.5s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .next-page-btn.visible {
+            opacity: 1;
+        }
+
+        .next-page-btn:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .next-page-btn::before {
+            content: "▶";
+            color: white;
+            font-size: 30px;
+        }
+
+        /* Animación de agujero negro */
+        .black-hole {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: #000;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            opacity: 0;
+            transition: width 1.2s ease, height 1.2s ease, opacity 1s ease;
+        }
+
+        .black-hole.active {
+            width: 200vmax;
+            height: 200vmax;
+            opacity: 1;
+        }
+
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            model-viewer {
+                width: 80vw;
+                height: 80vh;
+            }
+            
+            .word {
+                font-size: 18px;
+            }
+            
+            .controls {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            
+            .next-page-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 30px;
+            }
+            
+            .next-page-btn::before {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fondo espacial -->
+    <div class="space-background" id="spaceBackground"></div>
+    
+    <!-- Palabras flotantes -->
+    <div class="floating-words" id="floatingWords"></div>
+    
+    <!-- Animación de agujero negro -->
+    <div class="black-hole" id="blackHole"></div>
+    
+    <!-- Contenedor para centrar el corazón -->
+    <div class="heart-container">
+        <model-viewer
+            id="heartModel"
+            src="flower/scene.gltf"
+            camera-controls
+            auto-rotate
+            auto-rotate-delay="0"
+            rotation-per-second="30deg"
+            orientation="0 0 0"
+            style="--poster-color: transparent;"
+        ></model-viewer>
+    </div>
+    
+    <!-- Mensaje para móviles -->
+    <div class="mobile-message" id="mobileMessage">Mueve tu dispositivo para explorar el espacio</div>
+
+    <!-- Controles de rotación (ocultos visualmente) -->
+    <div class="controls">
+        <button class="control-btn" id="rotateRight">↻</button>
+        <button class="control-btn" id="pauseRotation">⏸</button>
+    </div>
+
+    <!-- Botón para siguiente página (solo símbolo de play) --> 
+    <button class="next-page-btn" id="nextPageBtn" aria-label="Siguiente página"></button>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    
+    <script>
+        // Crear el fondo de estrellas
+        document.addEventListener('DOMContentLoaded', function() {
+            const spaceBackground = document.getElementById('spaceBackground');
+            const floatingWords = document.getElementById('floatingWords');
+            const mobileMessage = document.getElementById('mobileMessage');
+            const heartModel = document.getElementById('heartModel');
+            const rotateRightBtn = document.getElementById('rotateRight');
+            const pauseRotationBtn = document.getElementById('pauseRotation');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const blackHole = document.getElementById('blackHole');
+            const starsCount = 400;
+            
+            // Lista de palabras amorosas
+            const loveWords = [
+                "TE AMO", "TE ADORO", "FELIZ CUMPLEAÑOS", "PRECIOSA", "HERMOSA",
+                "TE AMODORO", "MI CORAZÓN", "MI AMOR", "NIÑA DE OJOS LINDOS", "MI VIDA",
+                "MI REINA", "BELLA", "MI NOVIAA", "LA MAS BELLA", "ME BESAS?", "TALENTOSA",
+                "MI MUJER", "MI NIÑA", "MI DAMA", "DIVINA", "HERMOSAAA",
+                "MI TODO", "MI FUTURA ESPOSA", "TE AMO DEMASIADO", "PRECIOSOTA", "MI PIOLIN",
+                "TODO LO QUE DESEO", "LINDAA", "NIÑA INCREIBLE", "FELIZ CUMPLEE", "MI BELLA DAMA"
+            ];
+            
+            // Crear estrellas
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random();
+                if (size < 0.7) {
+                    star.classList.add('small');
+                } else if (size < 0.9) {
+                    star.classList.add('medium');
+                } else {
+                    star.classList.add('large');
+                }
+                
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const z = Math.random() * 2000 - 1000;
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.transform = `translateZ(${z}px)`;
+                
+                const duration = 2 + Math.random() * 8;
+                star.style.animationDuration = `${duration}s`;
+                
+                spaceBackground.appendChild(star);
+            }
+            
+            // Crear palabras flotantes
+            function createFloatingWords() {
+                floatingWords.innerHTML = '';
+                
+                const totalWords = 60;
+                
+                for (let i = 0; i < totalWords; i++) {
+                    const wordElement = document.createElement('div');
+                    wordElement.classList.add('word');
+                    
+                    const randomWord = loveWords[Math.floor(Math.random() * loveWords.length)];
+                    wordElement.textContent = randomWord;
+                    
+                    const startX = Math.random() * 80 + 10;
+                    const startY = Math.random() * 80 + 10;
+                    
+                    const endX = (Math.random() - 0.5) * 300;
+                    const endY = (Math.random() - 0.5) * 300;
+                    
+                    const delay = Math.random() * 20;
+                    const duration = 15 + Math.random() * 10;
+                    
+                    wordElement.style.left = `${startX}%`;
+                    wordElement.style.top = `${startY}%`;
+                    wordElement.style.animationDelay = `${delay}s`;
+                    wordElement.style.animationDuration = `${duration}s`;
+                    wordElement.style.setProperty('--x-end', endX);
+                    wordElement.style.setProperty('--y-end', endY);
+                    
+                    const fontSize = 18 + Math.random() * 14;
+                    wordElement.style.fontSize = `${fontSize}px`;
+                    
+                    const baseOpacity = 0.3 + Math.random() * 0.3;
+                    wordElement.style.color = `rgba(255, 255, 255, ${baseOpacity})`;
+                    
+                    floatingWords.appendChild(wordElement);
+                }
+            }
+            
+            createFloatingWords();
+            
+            // Mostrar botón después de 10 segundos
+            setTimeout(() => {
+                nextPageBtn.classList.add('visible');
+            }, 10000);
+            
+            // Configurar la rotación automática hacia la derecha
+            function setupRotation() {
+                heartModel.setAttribute('auto-rotate', '');
+                heartModel.setAttribute('rotation-per-second', '30deg');
+                
+                setTimeout(() => {
+                    heartModel.addEventListener('load', () => {
+                        heartModel.modelOrientation = '0 90deg 0';
+                    });
+                }, 1000);
+            }
+            
+            setupRotation();
+            
+            rotateRightBtn.addEventListener('click', () => {
+                heartModel.setAttribute('auto-rotate', '');
+                heartModel.setAttribute('rotation-per-second', '30deg');
+            });
+            
+            pauseRotationBtn.addEventListener('click', () => {
+                heartModel.removeAttribute('auto-rotate');
+            });
+            
+            // Función para cambiar de página con efecto de agujero negro
+            nextPageBtn.addEventListener('click', () => {
+                // Activar la animación de agujero negro
+                blackHole.classList.add('active');
+                
+                // Después de que la animación termine, cambiar de página
+                setTimeout(() => {
+                    window.location.href = 'proyect1.html';
+                }, 1200);
+            });
+            
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                mobileMessage.style.opacity = '1';
+                
+                setTimeout(() => {
+                    mobileMessage.style.opacity = '0';
+                }, 5000);
+                
+                window.addEventListener('deviceorientation', function(event) {
+                    const beta = event.beta || 0;
+                    const gamma = event.gamma || 0;
+                    
+                    spaceBackground.style.transform = `perspective(1000px) rotateX(${beta * 0.2}deg) rotateY(${gamma * 0.2}deg)`;
+                    floatingWords.style.transform = `perspective(1000px) rotateX(${beta * 0.1}deg) rotateY(${gamma * 0.1}deg)`;
+                });
+            } else {
+                document.addEventListener('mousemove', function(e) {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                    
+                    spaceBackground.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg)`;
+                    floatingWords.style.transform = `perspective(1000px) rotateX(${-y * 0.5}deg) rotateY(${x * 0.5}deg)`;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
